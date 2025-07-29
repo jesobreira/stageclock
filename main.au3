@@ -39,17 +39,17 @@ Global $tgtSec = 0
 Global $lastTime = ""
 
 ; ==== STAGE WINDOW ====
-Local $iScreenW = @DesktopWidth
-Local $iScreenH = @DesktopHeight
-Local $iStageW = Int($iScreenW * 0.3)
-Local $iStageH = Int($iScreenH / 8)
+Global $iStageX = Default, $iStageY = Default, $iStageW = Int(@DesktopWidth * 0.3), $iStageH = Int(@DesktopHeight / 8)
+Global $iCtrlX = Default, $iCtrlY = Default, $iCtrlW = 220, $iCtrlH = 240
 
-$hStageGUI = GUICreate("Timer", $iStageW, $iStageH, Default, Default, _
+RestoreWindowPositions()
+
+$hStageGUI = GUICreate("Timer", $iStageW, $iStageH, $iStageX, $iStageY, _
     BitOR($WS_CAPTION, $WS_THICKFRAME), _
     $WS_EX_TOOLWINDOW)
 GUISetBkColor(0x000000, $hStageGUI)
 
-$lblTime = GUICtrlCreateLabel("00:00", 0, 0, $iStageW, $iStageH, _
+$lblTime = GUICtrlCreateLabel("", 0, 0, $iStageW, $iStageH, _
     BitOR($SS_CENTER, $SS_CENTERIMAGE) _
 )
 GUICtrlSetFont($lblTime, Int($iStageH * 0.6), 400, 0, "Arial")
@@ -60,7 +60,7 @@ GUISetOnEvent($GUI_EVENT_PRIMARYUP, "OnResizeStage")
 GUISetState(@SW_SHOW, $hStageGUI)
 
 ; ===== CONTROLLER WINDOW =====
-$hCtrlGUI = GUICreate("Timer", 300, 260)
+$hCtrlGUI = GUICreate("Timer", $iCtrlW, $iCtrlH, $iCtrlX, $iCtrlY)
 
 ; Mode selection
 $radModeMin  = GUICtrlCreateRadio("Minutes/Sec", 10, 10, 100, 20)
@@ -94,13 +94,15 @@ $sldTrans = GUICtrlCreateSlider(10, 150, 200, 20)
 GUICtrlSetData($sldTrans, 100)
 
 ; Control buttons
-$btnStart = GUICtrlCreateButton(">", 10, 190, 50, 30)
-$btnStop  = GUICtrlCreateButton("[]", 70, 190, 50, 30)
+$btnStart = GUICtrlCreateButton("Start", 10, 190, 50, 30)
+$btnStop  = GUICtrlCreateButton("Stop", 70, 190, 50, 30)
 
 GUISetState(@SW_SHOW, $hCtrlGUI)
 
 RemoveWindowCloseButton($hStageGUI)
 WinSetOnTop($hStageGUI, "", 1)
+
+OnAutoItExitRegister("SaveWindowPositions")
 
 ; ==== MAIN LOOP ====
 While True
@@ -187,24 +189,24 @@ Func _StartPause()
 
         $iRunning = True
         $iPaused  = False
-        GUICtrlSetData($btnStart, "||")
+        GUICtrlSetData($btnStart, "Pause")
     ElseIf Not $iPaused Then
         ; Pause
         $iPaused = True
         If $iMode = 0 Then $iElapsedOffset += Int(TimerDiff($hTimerStart) / 1000)
-        GUICtrlSetData($btnStart, ">")
+        GUICtrlSetData($btnStart, "Start")
     Else
         ; Resume
         $iPaused    = False
         $hTimerStart = TimerInit()
-        GUICtrlSetData($btnStart, "||")
+        GUICtrlSetData($btnStart, "Pause")
     EndIf
 EndFunc
 
 Func _Stop()
     $iRunning = False
     $iPaused  = False
-    GUICtrlSetData($lblTime, "00:00")
+    GUICtrlSetData($lblTime, "")
 
     ; Re-enable inputs
     GUISetState($GUI_ENABLE, $radModeMin)
@@ -215,7 +217,7 @@ Func _Stop()
     GUISetState($GUI_ENABLE, $spinMin)
     GUISetState($GUI_ENABLE, $chkReverse)
 
-    GUICtrlSetData($btnStart, ">")
+    GUICtrlSetData($btnStart, "Start")
 EndFunc
 
 Func _UpdateTimer()
@@ -264,4 +266,40 @@ Func RemoveWindowCloseButton($hWin)
 	; refresh the non‑client frame
 	_WinAPI_SetWindowPos($hWin, 0, 0, 0, 0, 0, _
 		BitOR($SWP_NOMOVE, $SWP_NOSIZE, $SWP_FRAMECHANGED))
+EndFunc
+
+Func SaveWindowPositions()
+    Local $stagePos = WinGetPos($hStageGUI)
+    Local $ctrlPos  = WinGetPos($hCtrlGUI)
+    IniWrite(@TempDir & "\stageclock.ini", "Windows", "Stage", _
+        $stagePos[0] & "," & $stagePos[1] & "," & $stagePos[2] & "," & $stagePos[3])
+    IniWrite(@TempDir & "\stageclock.ini", "Windows", "Controller", _
+        $ctrlPos[0] & "," & $ctrlPos[1] & "," & $ctrlPos[2] & "," & $ctrlPos[3])
+EndFunc
+
+Global $iStageX = Default, $iStageY = Default, $iStageW = Int(@DesktopWidth * 0.3), $iStageH = Int(@DesktopHeight / 8)
+Global $iCtrlX = Default, $iCtrlY = Default, $iCtrlW = 300, $iCtrlH = 260
+
+Func RestoreWindowPositions()
+    Local $ini = @TempDir & "\stageclock.ini"
+    Local $stageIni = IniRead($ini, "Windows", "Stage", "")
+    Local $ctrlIni  = IniRead($ini, "Windows", "Controller", "")
+    If $stageIni <> "" Then
+        Local $a = StringSplit($stageIni, ",")
+        If $a[0] = 4 Then
+            $iStageX = Number($a[1])
+            $iStageY = Number($a[2])
+            $iStageW = Number($a[3])
+            $iStageH = Number($a[4])
+        EndIf
+    EndIf
+    If $ctrlIni <> "" Then
+        Local $a = StringSplit($ctrlIni, ",")
+        If $a[0] = 4 Then
+            $iCtrlX = Number($a[1])
+            $iCtrlY = Number($a[2])
+            $iCtrlW = Number($a[3])
+            $iCtrlH = Number($a[4])
+        EndIf
+    EndIf
 EndFunc
