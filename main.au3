@@ -1,4 +1,11 @@
 #NoTrayIcon
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=icon.ico
+#AutoIt3Wrapper_Outfile_x64=StageClock.exe
+#AutoIt3Wrapper_Res_Comment=StageClock
+#AutoIt3Wrapper_Res_Description=StageClock
+#AutoIt3Wrapper_Res_Fileversion=1.0.0
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <GUIConstantsEx.au3>
 #include <WindowsConstants.au3>
 #include <Misc.au3>
