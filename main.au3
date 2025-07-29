@@ -1,9 +1,13 @@
+#NoTrayIcon
 #include <GUIConstantsEx.au3>
 #include <WindowsConstants.au3>
 #include <Misc.au3>
 #include <WinAPI.au3>
 #include <StaticConstants.au3>
 #include <Math.au3>
+#include <WinAPISys.au3>
+
+Opt("GUICloseOnEsc", 0)
 
 ; Trackbar message constants
 Global Const $TBM_SETRANGEMIN = 0x00B1
@@ -39,10 +43,9 @@ Local $iScreenH = @DesktopHeight
 Local $iStageW = Int($iScreenW * 0.3)
 Local $iStageH = Int($iScreenH / 8)
 
-$hStageGUI = GUICreate("Stage", $iStageW, $iStageH, Default, Default, _
+$hStageGUI = GUICreate("Timer", $iStageW, $iStageH, Default, Default, _
     BitOR($WS_CAPTION, $WS_THICKFRAME), _
-    $WS_EX_TOOLWINDOW _
-)
+    $WS_EX_TOOLWINDOW)
 GUISetBkColor(0x000000, $hStageGUI)
 
 $lblTime = GUICtrlCreateLabel("00:00", 0, 0, $iStageW, $iStageH, _
@@ -56,7 +59,7 @@ GUISetOnEvent($GUI_EVENT_PRIMARYUP, "OnResizeStage")
 GUISetState(@SW_SHOW, $hStageGUI)
 
 ; ===== CONTROLLER WINDOW =====
-$hCtrlGUI = GUICreate("Controller", 300, 260)
+$hCtrlGUI = GUICreate("Timer", 300, 260)
 
 ; Mode selection
 $radModeMin  = GUICtrlCreateRadio("Minutes/Sec", 10, 10, 100, 20)
@@ -95,6 +98,9 @@ $btnStop  = GUICtrlCreateButton("[]", 70, 190, 50, 30)
 
 GUISetState(@SW_SHOW, $hCtrlGUI)
 
+RemoveWindowCloseButton($hStageGUI)
+WinSetOnTop($hStageGUI, "", 1)
+
 ; ==== MAIN LOOP ====
 While True
     Local $msg = GUIGetMsg()
@@ -106,7 +112,7 @@ While True
 		Case $radModeTime
 			ToggleMode(1)
         Case $chkReverse
-            $iReverse = GUICtrlRead($chkReverse)
+            $iReverse = (GUICtrlRead($chkReverse) = $GUI_CHECKED)
         Case $chkTop
             WinSetOnTop($hStageGUI, "", GUICtrlRead($chkTop))
         Case $btnStart
@@ -151,7 +157,7 @@ EndFunc
 Func _StartPause()
     If Not $iRunning Then
         ; Initialize new timer
-        $iReverse = GUICtrlRead($chkReverse)
+        $iReverse = (GUICtrlRead($chkReverse) = $GUI_CHECKED)
         If $iMode = 0 Then
             Local $m = Int(GUICtrlRead($inpMin))
             Local $s = Int(GUICtrlRead($inpSec))
@@ -241,4 +247,14 @@ Func OnResizeStage()
         Int(($w - $pos[2]) / 2), _
         Int(($h - $pos[3]) / 2) _
     )
+EndFunc
+
+Func RemoveWindowCloseButton($hWin)
+	Local $dwStyle = _WinAPI_GetWindowLong($hWin, $GWL_STYLE)
+	; clear the WS_SYSMENU bit (that adds the X)
+	$dwStyle = BitAND($dwStyle, BitNOT($WS_SYSMENU))
+	_WinAPI_SetWindowLong($hWin, $GWL_STYLE, $dwStyle)
+	; refresh the non‑client frame
+	_WinAPI_SetWindowPos($hWin, 0, 0, 0, 0, 0, _
+		BitOR($SWP_NOMOVE, $SWP_NOSIZE, $SWP_FRAMECHANGED))
 EndFunc
