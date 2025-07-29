@@ -36,6 +36,7 @@ Global $iOrigSec = 0
 Global $iElapsedOffset = 0
 Global $hTimerStart = 0
 Global $tgtSec = 0
+Global $lastTime = ""
 
 ; ==== STAGE WINDOW ====
 Local $iScreenW = @DesktopWidth
@@ -232,7 +233,13 @@ Func _UpdateTimer()
 
     Local $mi = Int($dispSec / 60)
     Local $se = Mod($dispSec, 60)
-    GUICtrlSetData($lblTime, StringFormat("%02d:%02d", $mi, $se))
+
+	Local $sNewTime = StringFormat("%02d:%02d", $mi, $se)
+
+	If $sNewTime <> $lastTime Then
+		GUICtrlSetData($lblTime, $sNewTime)
+		$lastTime = $sNewTime
+	EndIf
 EndFunc
 
 Func OnResizeStage()
