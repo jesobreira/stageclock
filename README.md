@@ -17,24 +17,25 @@ Note: it does not operate on a network. The "remote control" window is local, ju
   * Start, pause/resume, and reset the timer
   * Set countdown/up by minutes/seconds, or to a specific target time
   * Choose counting direction (Reverse or Forward)
-  * Toggle ìAlways on topî and set window transparency
+  * Toggle ‚ÄúAlways on top‚Äù and set window transparency
 
 * **Saves and restores window positions automatically**
 
 ## How to Use
 
-Download it from the Releases page on the side bar and just run it.
+[Download it from the Releases page](https://github.com/jesobreira/stageclock/releases) and just run it.
 
 ## Contribute
 
-1. **Install [AutoIt](https://www.autoitscript.com/site/autoit/downloads/)** if you donít have it.
+1. **Install [AutoIt](https://www.autoitscript.com/site/autoit/downloads/)** if you don‚Äôt have it.
 2. Download or clone this repository.
 3. Run `main.au3` using AutoIt or compile it.
 
 ## Saving Window Positions
 
-* The position and size of both windows are saved automatically to `stageclock.ini` in the same folder.
+* The position and size of both windows are saved automatically to `stageclock.ini` in the temp folder (`%TEMP%`).
 * On next launch, windows are restored to their previous locations.
+* To reset it, or if the window is spawning at an unexisting monitor, with StageClock closed, open Run (Windows key + R), paste `cmd /c del %TEMP%\stageclock.ini` and hit Enter. Nothing will show up. Now, try opening StageClock again.
 
 ## Help! My AV says it has a virus!
 
