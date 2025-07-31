@@ -28,7 +28,7 @@ Note: it does not operate on a network. The "remote control" window is local, ju
 ## Contribute
 
 1. **Install [AutoIt](https://www.autoitscript.com/site/autoit/downloads/)** if you don’t have it.
-2. Download or clone this repository.
+2. Fork, download or clone [this repository](https://github.com/jesobreira/stageclock).
 3. Run `main.au3` using AutoIt or compile it.
 
 ## Saving Window Positions
